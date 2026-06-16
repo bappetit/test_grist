@@ -3,127 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscription aux Événements</title>
+    <title>Inscription Eureka</title>
+    <style>
+        body { font-family: sans-serif; background-color: transparent; margin: 0; padding: 10px; color: #333; }
+        .container { max-width: 550px; margin: 0 auto; background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        h3 { color: #0f6cbc; margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        input[type="text"], input[type="email"], select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        
+        /* Style Radio Buttons */
+        .radio-group { display: flex; flex-wrap: wrap; gap: 10px; background: #f9f9f9; padding: 10px; border-radius: 4px; border: 1px solid #eee; }
+        .radio-item { display: flex; align-items: center; font-size: 14px; cursor: pointer; }
+        .radio-item input { margin-right: 5px; cursor: pointer; }
+
+        /* Zone Description */
+        #event-description { margin-top: 10px; padding: 12px; background-color: #e7f3ff; border-left: 4px solid #0f6cbc; font-size: 13px; line-height: 1.4; display: none; border-radius: 0 4px 4px 0; }
+        
+        .btn-submit { background-color: #0f6cbc; color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; margin-top: 10px; }
+        .btn-submit:hover { background-color: #0a4b83; }
+        
+        #moodle-form-message { padding: 10px; border-radius: 4px; margin-top: 15px; display: none; font-weight: bold; text-align: center; }
+        .loading { font-style: italic; color: #666; }
+    </style>
 </head>
-<body style="margin: 0; padding: 10px; font-family: sans-serif; background-color: transparent;">
+<body>
 
 <script>
+    // SÉCURITÉ : Vérification de l'hôte Eureka
     (function() {
         const estDansUneIframe = (window.self !== window.top);
         const urlParent = document.referrer;
         const siteAutorise = "https://eureka.univ-lehavre.fr";
-
         if (!estDansUneIframe || !urlParent.startsWith(siteAutorise)) {
-            document.body.innerHTML = `
-                <div style="padding: 20px; color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; text-align: center; margin: 30px auto; max-width: 450px;">
-                    <h3 style="margin-top:0;">Accès non autorisé</h3>
-                </div>
-            `;
+            document.body.innerHTML = `<div style="padding:20px;color:#721c24;background:#f8d7da;border:1px solid #f5c6cb;border-radius:5px;text-align:center;margin:30px auto;max-width:450px;"><h3>🛑 Accès non autorisé</h3><p>Ce formulaire ne peut être utilisé que depuis Eureka.</p></div>`;
             window.stop();
         }
     })();
 </script>
 
-<div style="max-width: 550px; margin: 10px auto; background: #ffffff; padding: 20px; border: 1px solid #ddd; border-radius: 6px;">
+<div class="container">
+    <h3>Formulaire d'Inscription</h3>
     
-    <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
-        <h3 style="margin-top: 0; color: #0f6cbc;">Événements disponibles</h3>
-        <div id="moodle-loading-events" style="font-style: italic; color: #666; padding: 8px; border-radius: 4px;">Chargement des événements en cours...</div>
-        <ul id="moodle-events-list" style="padding-left: 20px; margin: 5px 0;"></ul>
-    </div>
-
-    <div style="margin-bottom: 0; padding-bottom: 0;">
-        <h3 style="margin-top: 0; color: #0f6cbc;">Inscription</h3>
-        <form id="moodle-inscription-form">
-            
-            <div style="margin-bottom: 12px;">
-                <label for="moodle-nom" style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Nom complet :</label>
-                <input type="text" id="moodle-nom" required placeholder="Ex: Jean Dupont" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+    <form id="inscription-form">
+        <div style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex: 1;">
+                <label for="nom">Nom :</label>
+                <input type="text" id="nom" required placeholder="DUPONT">
             </div>
-
-            <div style="margin-bottom: 12px;">
-                <label for="moodle-email" style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Adresse Email :</label>
-                <input type="email" id="moodle-email" required placeholder="Ex: jean.dupont@univ.fr" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+            <div class="form-group" style="flex: 1;">
+                <label for="prenom">Prénom :</label>
+                <input type="text" id="prenom" required placeholder="Jean">
             </div>
+        </div>
 
-            <div style="margin-bottom: 12px;">
-                <label for="moodle-numEtudiant" style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Numéro d'étudiant :</label>
-                <input type="text" id="moodle-numEtudiant" required placeholder="Ex: 22104321" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+        <div class="form-group">
+            <label for="email">Email Universitaire :</label>
+            <input type="email" id="email" required placeholder="jean.dupont@univ-lehavre.fr">
+        </div>
+
+        <div class="form-group">
+            <label for="numEtudiant">Numéro d'étudiant :</label>
+            <input type="text" id="numEtudiant" required placeholder="Ex: 22104321">
+        </div>
+
+        <div class="form-group">
+            <label>Année d'étude :</label>
+            <div class="radio-group">
+                <label class="radio-item"><input type="radio" name="annee" value="L1" required> L1</label>
+                <label class="radio-item"><input type="radio" name="annee" value="L2"> L2</label>
+                <label class="radio-item"><input type="radio" name="annee" value="L3"> L3</label>
+                <label class="radio-item"><input type="radio" name="annee" value="BUT1"> BUT1</label>
+                <label class="radio-item"><input type="radio" name="annee" value="BUT2"> BUT2</label>
+                <label class="radio-item"><input type="radio" name="annee" value="BUT3"> BUT3</label>
+                <label class="radio-item"><input type="radio" name="annee" value="Master"> Master</label>
+                <label class="radio-item"><input type="radio" name="annee" value="Autre"> Autre</label>
             </div>
+        </div>
 
-            <div style="margin-bottom: 12px;">
-                <label for="moodle-choix" style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Sélectionnez l'événement :</label>
-                <select id="moodle-choix" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                    <option value="">-- Choisir un événement --</option>
-                </select>
+        <div class="form-group">
+            <label>Composante :</label>
+            <div class="radio-group">
+                <label class="radio-item"><input type="radio" name="composante" value="UFR ST" required> UFR ST</label>
+                <label class="radio-item"><input type="radio" name="composante" value="IUT"> IUT</label>
+                <label class="radio-item"><input type="radio" name="composante" value="UFR LSH"> UFR LSH</label>
+                <label class="radio-item"><input type="radio" name="composante" value="UFR Affaires Int."> UFR Affaires Int.</label>
+                <label class="radio-item"><input type="radio" name="composante" value="ISEL"> ISEL</label>
             </div>
+        </div>
 
-            <button type="submit" style="background-color: #0f6cbc; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-size: 15px; font-weight: bold;">Confirmer l'inscription</button>
-        </form>
-        
-        <div id="moodle-form-message" style="padding: 10px; border-radius: 4px; margin-top: 10px; display: none; font-weight: bold;"></div>
-    </div>
+        <div class="form-group">
+            <label for="evenement">Événement :</label>
+            <div id="loader-events" class="loading">Chargement des événements...</div>
+            <select id="evenement" required style="display:none;">
+                <option value="">-- Choisir un événement --</option>
+            </select>
+            <div id="event-description"></div>
+        </div>
+
+        <button type="submit" class="btn-submit">Confirmer l'inscription</button>
+    </form>
+
+    <div id="moodle-form-message"></div>
 </div>
 
 <script>
     (function() {
         const WORKER_URL = "https://workergrist.baptiste-petit.workers.dev/"; 
-
-        const listElement = document.getElementById('moodle-events-list');
-        const selectElement = document.getElementById('moodle-choix');
-        const loader = document.getElementById('moodle-loading-events');
-        const form = document.getElementById('moodle-inscription-form');
+        const form = document.getElementById('inscription-form');
+        const selectEvent = document.getElementById('evenement');
+        const descBox = document.getElementById('event-description');
+        const loader = document.getElementById('loader-events');
         const messageDiv = document.getElementById('moodle-form-message');
 
-        // 1. Récupération des événements (GET)
-        async function fetchEvents() {
+        // Objet pour stocker les descriptions en local
+        let descriptionsMap = {};
+
+        // 1. Charger les événements au démarrage
+        async function loadEvents() {
             try {
                 const response = await fetch(WORKER_URL);
-                
-                if (!response.ok) {
-                    const errData = await response.json().catch(() => ({}));
-                    throw new Error(errData.error || errData.details || `Erreur serveur (${response.status})`);
-                }
-                
                 const records = await response.json();
+                
                 loader.style.display = 'none';
-
-                if (!records || records.length === 0) {
-                    listElement.innerHTML = "<li>Aucun événement disponible actuellement.</li>";
-                    return;
-                }
+                selectEvent.style.display = 'block';
 
                 records.forEach(record => {
-                    const fields = record.fields;
-                    const eventName = fields.Nom || fields.Titre || `Événement N°${record.id}`;
+                    const f = record.fields;
+                    const name = f.Nom || f.Titre;
+                    const desc = f.Description || "Aucune description disponible.";
 
-                    const li = document.createElement('li');
-                    li.textContent = eventName;
-                    listElement.appendChild(li);
-
-                    const option = document.createElement('option');
-                    option.value = eventName;
-                    option.textContent = eventName;
-                    selectElement.appendChild(option);
+                    if (name) {
+                        const opt = document.createElement('option');
+                        opt.value = name;
+                        opt.textContent = name;
+                        selectEvent.appendChild(opt);
+                        
+                        // On stocke la description liée au nom
+                        descriptionsMap[name] = desc;
+                    }
                 });
             } catch (err) {
-                loader.innerHTML = "⚠️ <strong>Erreur technique :</strong> " + err.message + "<br><small>Veuillez contacter un administrateur.</small>";
-                loader.style.backgroundColor = "#f8d7da";
-                loader.style.color = "#721c24";
-                console.error("Détail de l'erreur FetchEvents:", err);
+                loader.textContent = "Erreur de chargement des événements.";
+                console.error(err);
             }
         }
 
-        // 2. Soumission du formulaire (POST)
+        // 2. Gérer l'affichage de la description au changement de sélection
+        selectEvent.addEventListener('change', function() {
+            const selectedName = selectEvent.value;
+            if (selectedName && descriptionsMap[selectedName]) {
+                descBox.innerHTML = "<strong>Description :</strong><br>" + descriptionsMap[selectedName];
+                descBox.style.display = 'block';
+            } else {
+                descBox.style.display = 'none';
+            }
+        });
+
+        // 3. Envoi du formulaire
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             messageDiv.style.display = "none";
 
+            // Récupération des valeurs radio
+            const selectedAnnee = document.querySelector('input[name="annee"]:checked')?.value;
+            const selectedComposante = document.querySelector('input[name="composante"]:checked')?.value;
+
             const payload = {
-                nom: document.getElementById('moodle-nom').value,
-                email: document.getElementById('moodle-email').value,
-                numEtudiant: document.getElementById('moodle-numEtudiant').value,
-                choix: document.getElementById('moodle-choix').value
+                nom: document.getElementById('nom').value,
+                prenom: document.getElementById('prenom').value,
+                email: document.getElementById('email').value,
+                numEtudiant: document.getElementById('numEtudiant').value,
+                choix: selectEvent.value,
+                annee: selectedAnnee,
+                composante: selectedComposante
             };
 
             try {
@@ -133,30 +186,27 @@
                     body: JSON.stringify(payload)
                 });
 
-                const result = await response.json().catch(() => ({}));
+                const result = await response.json();
 
                 if (response.ok && result.success) {
-                    messageDiv.textContent = "✅ Inscription enregistrée avec succès !";
-                    messageDiv.style.backgroundColor = "#d4edda";
+                    messageDiv.textContent = "✅ Inscription réussie !";
+                    messageDiv.style.background = "#d4edda";
                     messageDiv.style.color = "#155724";
                     messageDiv.style.display = "block";
                     form.reset();
+                    descBox.style.display = 'none';
                 } else {
-                    throw new Error(result.error || result.details || "Une erreur est survenue.");
+                    throw new Error(result.error || "Erreur lors de l'envoi.");
                 }
             } catch (err) {
-                messageDiv.textContent = "❌ Échec de l'inscription : " + err.message;
-                messageDiv.style.backgroundColor = "#f8d7da";
+                messageDiv.textContent = "❌ Erreur : " + err.message;
+                messageDiv.style.background = "#f8d7da";
                 messageDiv.style.color = "#721c24";
                 messageDiv.style.display = "block";
             }
         });
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', fetchEvents);
-        } else {
-            fetchEvents();
-        }
+        loadEvents();
     })();
 </script>
 
