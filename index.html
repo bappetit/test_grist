@@ -63,11 +63,6 @@
         </div>
 
         <div class="form-group">
-            <label for="numEtudiant">Numéro d'étudiant :</label>
-            <input type="text" id="numEtudiant" required placeholder="Ex: 22104321">
-        </div>
-
-        <div class="form-group">
             <label>Année d'étude :</label>
             <div class="radio-group">
                 <label class="radio-item"><input type="radio" name="annee" value="L1" required> L1</label>
@@ -116,7 +111,6 @@
         const loader = document.getElementById('loader-events');
         const messageDiv = document.getElementById('moodle-form-message');
 
-        // Objet pour stocker les descriptions en local
         let descriptionsMap = {};
 
         // 1. Charger les événements au démarrage
@@ -138,8 +132,6 @@
                         opt.value = name;
                         opt.textContent = name;
                         selectEvent.appendChild(opt);
-                        
-                        // On stocke la description liée au nom
                         descriptionsMap[name] = desc;
                     }
                 });
@@ -149,7 +141,7 @@
             }
         }
 
-        // 2. Gérer l'affichage de la description au changement de sélection
+        // 2. Gérer l'affichage de la description
         selectEvent.addEventListener('change', function() {
             const selectedName = selectEvent.value;
             if (selectedName && descriptionsMap[selectedName]) {
@@ -160,12 +152,11 @@
             }
         });
 
-        // 3. Envoi du formulaire
+        // 3. Envoi du formulaire (sans numEtudiant)
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             messageDiv.style.display = "none";
 
-            // Récupération des valeurs radio
             const selectedAnnee = document.querySelector('input[name="annee"]:checked')?.value;
             const selectedComposante = document.querySelector('input[name="composante"]:checked')?.value;
 
@@ -173,7 +164,6 @@
                 nom: document.getElementById('nom').value,
                 prenom: document.getElementById('prenom').value,
                 email: document.getElementById('email').value,
-                numEtudiant: document.getElementById('numEtudiant').value,
                 choix: selectEvent.value,
                 annee: selectedAnnee,
                 composante: selectedComposante
