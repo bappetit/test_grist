@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription aux Événements</title>
+    <style>
+        :root {
+            --primary: #0053b3;
+            --success: #107c41;
+            --error: #a80000;
+            --bg: #f4f5f7;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+        .section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e1e4e8;
+        }
+        .section:last-child {
+            border-bottom: none;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .message {
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 15px;
+            display: none;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: var(--success);
+            display: block;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: var(--error);
+            display: block;
+        }
+        .loading {
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="section">
+        <h2>Événements disponibles</h2>
+        <div id="loadingEvents" class="loading">Chargement des événements...</div>
+        <ul id="eventsList"></ul>
+    </div>
+
+    <div class="section">
+        <h2>Formulaire d'inscription</h2>
+        <form id="inscriptionForm">
+            <div class="form-group">
+                <label prejudices for="nom">Nom complet :</label>
+                <input type="text" id="nom" name="nom" required placeholder="Ex: Jean Dupont">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Adresse Email :</label>
+                <input type="email" id="email" name="email" required placeholder="Ex: jean.dupont@email.com">
+            </div>
+
+            <div class="form-group">
+                <label for="numEtudiant">Numéro d'étudiant :</label>
+                <input type="text" id="numEtudiant" name="numEtudiant" required placeholder="Ex: 22104321">
+            </div>
+
+            <div class="form-group">
+                <label for="choix">Choisissez votre événement :</label>
+                <select id="choix" name="choix" required>
+                    <option value="">-- Sélectionnez un événement --</option>
+                    </select>
+            </div>
+
+            <button type="submit">S'inscrire</button>
+        </form>
+        
+        <div id="formMessage" class="message"></div>
+    </div>
+</div>
+
+<script>
+    // /!\ REMPLACE CETTE URL PAR CELLE DE TON WORKER CLOUDFLARE
+    const WORKER_URL = "https://TON_WORKER.SUBDOMAIN.workers.dev"; 
+
+    // 1. CHARGEMENT DES ÉVÉNEMENTS (Méthode GET)
+    async function loadEvents() {
+        const listElement = document.getElementById('eventsList');
+        const selectElement = document.getElementById('choix');
+        const loader = document.getElementById('loadingEvents');
+
+        try {
+            const response = await fetch(WORKER_URL);
+            if (!response.ok) throw new Error('Impossible de récupérer les événements');
+            
+            const records = await response.json();
+            loader.style.display = 'none';
+
+            if(records.length === 0) {
+                listElement.innerHTML = "<li>Aucun événement de prévu pour le moment.</li>";
+                return;
+            }
+
+            records.forEach(record => {
+                const fields = record.fields;
+                // Ajuste 'fields.Nom' ou 'fields.Titre' selon le nom exact de ta colonne dans Grist
+                const eventName = fields.Nom || fields.Titre || `Événement ${record.id}`; 
+
+                // Ajout à la liste visuelle
+                const li = document.createElement('li');
+                li.textContent = eventName;
+                listElement.appendChild(li);
+
+                // Ajout au menu déroulant du formulaire
+                const option = document.createElement('option');
+                option.value = eventName; // Ce qui sera envoyé à la colonne 'choix'
+                option.textContent = eventName;
+                selectElement.appendChild(option);
+            });
+
+        } catch (error) {
+            console.error(error);
+            loader.textContent = "Erreur lors du chargement des événements.";
+            loader.style.color = "var(--error)";
+        }
+    }
+
+    // 2. ENVOI DU FORMULAIRE (Méthode POST)
+    document.getElementById('inscriptionForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const messageDiv = document.getElementById('formMessage');
+        messageDiv.className = "message"; // Reset
+        messageDiv.style.display = "none";
+
+        // Récupération des données du formulaire
+        const formData = {
+            nom: document.getElementById('nom').value,
+            email: document.getElementById('email').value,
+            numEtudiant: document.getElementById('numEtudiant').value,
+            choix: document.getElementById('choix').value
+        };
+
+        try {
+            const response = await fetch(WORKER_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                messageDiv.textContent = "Inscription validée avec succès !";
+                messageDiv.classList.add('success');
+                document.getElementById('inscriptionForm').reset();
+            } else {
+                throw new Error(result.error || "Une erreur est survenue lors de l'inscription.");
+            }
+
+        } catch (error) {
+            messageDiv.textContent = error.message;
+            messageDiv.classList.add('error');
+        }
+    });
+
+    // Lancer le chargement des événements au démarrage de la page
+    window.addEventListener('DOMContentLoaded', loadEvents);
+</script>
+
+</body>
+</html>
