@@ -16,8 +16,7 @@
         if (!estDansUneIframe || !urlParent.startsWith(siteAutorise)) {
             document.body.innerHTML = `
                 <div style="padding: 20px; color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; text-align: center; margin: 30px auto; max-width: 450px;">
-                    <h3 style="margin-top:0;">🛑 Accès non autorisé</h3>
-                    <p style="margin-bottom:0;">Ce formulaire est protégé et ne peut être utilisé que depuis la plateforme Eureka.</p>
+                    <h3 style="margin-top:0;">Accès non autorisé</h3>
                 </div>
             `;
             window.stop();
